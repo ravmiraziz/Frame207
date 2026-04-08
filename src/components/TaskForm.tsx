@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { X, Calendar, Paperclip, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { taskSchema } from "@/schema/taskSchema";
+import { taskSchema, type TaskFormValues } from "../schema/taskSchema";
+import { useDebounce } from "../hooks/useDebounce";
 import {
-  fetchAssignees,
-  fetchThemes,
-  fetchTags,
-  fetchPeriodicities,
-} from "@/api/mock";
+  useAssignees,
+  useThemes,
+  useTags,
+  usePeriodicities,
+} from "../hooks/useTaskQueries";
 
 import { FieldWrapper } from "./ui/FieldWrapper";
 import { Input } from "./ui/Input";
@@ -24,12 +24,7 @@ import { TagsSelect } from "./ui/TagsSelect";
 
 export const TaskForm = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const debouncedQuery = useDebounce(searchQuery, 300);
 
   const {
     control,
@@ -37,7 +32,7 @@ export const TaskForm = () => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       context: "",
@@ -61,38 +56,26 @@ export const TaskForm = () => {
   const routineNameValue = watch("routineName");
   const routineDescValue = watch("routineDescription");
 
+  // Clear assignees when switching mode
   useEffect(() => {
     setValue("assignees", []);
   }, [isTeam, setValue]);
 
+  // Queries
   const { data: assigneesOptions = [], isLoading: isLoadingAssignees } =
-    useQuery({
-      queryKey: ["assignees", debouncedQuery, isTeam],
-      queryFn: () => fetchAssignees(debouncedQuery, isTeam),
-    });
+    useAssignees(debouncedQuery, isTeam);
+  const { data: themesOptions = [] } = useThemes();
+  const { data: tagsOptions = [] } = useTags();
+  const { data: periodicityOptions = [] } = usePeriodicities();
 
-  const { data: themesOptions = [] } = useQuery({
-    queryKey: ["themes"],
-    queryFn: fetchThemes,
-  });
-
-  const { data: tagsOptions = [] } = useQuery({
-    queryKey: ["tags"],
-    queryFn: fetchTags,
-  });
-
-  const { data: periodicityOptions = [] } = useQuery({
-    queryKey: ["periodicities"],
-    queryFn: fetchPeriodicities,
-  });
-
-  const onSubmit = (data) => {
+  const onSubmit = (data: TaskFormValues) => {
     console.log("Form Data:", data);
     alert("Задача успешно создана! Проверьте консоль.");
   };
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
         <div className="flex items-center gap-2 text-purple-700 font-semibold">
           <div className="w-5 h-5 rounded bg-purple-100 flex items-center justify-center">
@@ -116,6 +99,7 @@ export const TaskForm = () => {
         </button>
       </div>
 
+      {/* Tabs */}
       <div className="px-4 pt-4">
         <div className="flex bg-gray-100 rounded-full p-1">
           <button className="flex-1 bg-purple-600 text-white text-sm font-medium py-2 rounded-full shadow-sm">
@@ -127,6 +111,7 @@ export const TaskForm = () => {
         </div>
       </div>
 
+      {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Controller
@@ -398,12 +383,15 @@ export const TaskForm = () => {
             </div>
           </FieldWrapper>
 
+          {/* Hidden submit button to allow enter key submission */}
           <button type="submit" className="hidden">
             Submit
           </button>
         </form>
       </div>
 
+      {/* Footer / Submit area could be here, but design doesn't show one explicitly, 
+          maybe it auto-saves or there's a button outside. Let's add a subtle submit button just in case. */}
       <div className="p-4 border-t border-gray-100 bg-gray-50">
         <button
           onClick={handleSubmit(onSubmit)}

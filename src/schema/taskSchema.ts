@@ -2,9 +2,10 @@ import { z } from 'zod';
 
 export const taskSchema = z.object({
   context: z.string().min(1, 'Контекст задачи обязателен').max(4096, 'Максимум 4096 символов'),
-  isTeam: z.boolean().default(false),
-  isRoutine: z.boolean().default(false),
+  isTeam: z.boolean(),
+  isRoutine: z.boolean(),
   
+  // Routine fields
   routineName: z.string().max(255, 'Максимум 255 символов').optional(),
   periodicity: z.string().optional(),
   routineDescription: z.string().max(1024, 'Максимум 1024 символов').optional(),
@@ -17,7 +18,7 @@ export const taskSchema = z.object({
   
   deadlineDate: z.string().optional(),
   deadlineTime: z.string().optional(),
-  deadlineDays: z.string().optional(),
+  deadlineDays: z.string().optional(), // For routine task
   
   theme: z.string().min(1, 'Укажите тему'),
   tags: z.array(z.string()).optional(),
@@ -49,3 +50,5 @@ export const taskSchema = z.object({
     }
   }
 });
+
+export type TaskFormValues = z.infer<typeof taskSchema>;

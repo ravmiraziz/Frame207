@@ -1,4 +1,15 @@
-const mockUsers = [
+export interface User {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+}
+
+const mockUsers: User[] = [
   { id: '1', name: 'Аблямова Нигора', avatar: 'https://i.pravatar.cc/150?u=1' },
   { id: '2', name: 'Исроилoв Жамшид', avatar: 'https://i.pravatar.cc/150?u=2' },
   { id: '3', name: 'Иванов Иван', avatar: 'https://i.pravatar.cc/150?u=3' },
@@ -8,7 +19,7 @@ const mockUsers = [
   { id: '7', name: 'Кузнецова Мария', avatar: 'https://i.pravatar.cc/150?u=7' },
 ];
 
-const mockTeams = [
+const mockTeams: Team[] = [
   { id: 't1', name: 'Frontend Team' },
   { id: 't2', name: 'Backend Team' },
   { id: 't3', name: 'Design Team' },
@@ -16,8 +27,10 @@ const mockTeams = [
   { id: 't5', name: 'Management' },
 ];
 
-export const fetchAssignees = async (query, isTeam) => {
+export const fetchAssignees = async (query: string, isTeam: boolean): Promise<(User | Team)[]> => {
+  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500));
+
   const lowerQuery = query.toLowerCase();
   if (isTeam) {
     return mockTeams.filter((team) => team.name.toLowerCase().includes(lowerQuery));

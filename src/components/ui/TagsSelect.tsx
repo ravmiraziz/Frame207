@@ -1,36 +1,58 @@
-import React, { Fragment } from 'react';
-import { Listbox, Transition } from '@headlessui/react';
-import { ChevronDown, Check, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { Fragment } from "react";
+import { Listbox, Transition } from "@headlessui/react";
+import { ChevronDown, Check, X } from "lucide-react";
+import { cn } from "../../lib/utils";
 
-export const TagsSelect = ({
+interface Tag {
+  id: string;
+  name: string;
+  color?: string;
+}
+
+interface TagsSelectProps {
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+  options: Tag[];
+  placeholder?: string;
+  className?: string;
+  error?: boolean;
+}
+
+export const TagsSelect: React.FC<TagsSelectProps> = ({
   selectedTags,
   onChange,
   options,
   placeholder = "Укажите соответствующие теги",
   className,
-  error
+  error,
 }) => {
-  const selectedItems = options.filter(opt => selectedTags.includes(opt.id));
+  const selectedItems = options.filter((opt) => selectedTags.includes(opt.id));
 
-  const handleRemove = (idToRemove) => {
-    onChange(selectedTags.filter(id => id !== idToRemove));
+  const handleRemove = (idToRemove: string) => {
+    onChange(selectedTags.filter((id) => id !== idToRemove));
   };
 
   return (
     <Listbox value={selectedTags} onChange={onChange} multiple>
       <div className={cn("relative mt-1", className)}>
-        <Listbox.Button className={cn(
-          "relative w-full cursor-default overflow-hidden rounded-full bg-white text-left border border-gray-300 focus:outline-none focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 sm:text-sm min-h-[40px] transition-colors flex flex-wrap items-center gap-1 p-1 pl-4 pr-10",
-          error && "border-red-500 focus-visible:ring-red-500"
-        )}>
+        <Listbox.Button
+          className={cn(
+            "relative w-full cursor-default overflow-hidden rounded-full bg-white text-left border border-gray-300 focus:outline-none focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 sm:text-sm min-h-[40px] transition-colors flex flex-wrap items-center gap-1 p-1 pl-4 pr-10",
+            error && "border-red-500 focus-visible:ring-red-500",
+          )}
+        >
           {selectedItems.length === 0 ? (
-            <span className="text-gray-400 block truncate py-1">{placeholder}</span>
+            <span className="text-gray-400 block truncate py-1">
+              {placeholder}
+            </span>
           ) : (
             selectedItems.map((item) => (
               <span
                 key={item.id}
-                className={cn("flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-white", item.color || "bg-purple-500")}
+                className={cn(
+                  "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-white",
+                  item.color || "bg-purple-500",
+                )}
               >
                 {item.name}
                 <span
@@ -63,14 +85,19 @@ export const TagsSelect = ({
                 className={({ active }) =>
                   cn(
                     "relative cursor-default select-none py-2 pl-10 pr-4",
-                    active ? "bg-purple-100 text-purple-900" : "text-gray-900"
+                    active ? "bg-purple-100 text-purple-900" : "text-gray-900",
                   )
                 }
                 value={option.id}
               >
                 {({ selected }) => (
                   <>
-                    <span className={cn("block truncate", selected ? "font-medium" : "font-normal")}>
+                    <span
+                      className={cn(
+                        "block truncate",
+                        selected ? "font-medium" : "font-normal",
+                      )}
+                    >
                       {option.name}
                     </span>
                     {selected ? (

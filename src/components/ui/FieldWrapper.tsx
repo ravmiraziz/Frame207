@@ -1,7 +1,21 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "../../lib/utils";
 
-export const FieldWrapper = ({ label, error, children, className, required }) => {
+interface FieldWrapperProps {
+  label?: string;
+  error?: string;
+  children: React.ReactNode;
+  className?: string;
+  required?: boolean;
+}
+
+export const FieldWrapper: React.FC<FieldWrapperProps> = ({
+  label,
+  error,
+  children,
+  className,
+  required,
+}) => {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
